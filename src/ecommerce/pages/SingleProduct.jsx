@@ -6,6 +6,59 @@ import instance from '../config/axiosConfig'
 
 const SingleProduct = () => {
 
+
+
+  // async function handleAddToCart(idToCart) {
+  //   const userId = 1; // assuming logged-in user ID
+  //   const cartId = 1; // assuming the cart ID (fakestore has carts 1–20)
+
+  //   try {
+  //     // 1️⃣ Get the existing cart
+
+  //     const response = await instance.get(`carts/${cartId}`);
+  //     let product_arr = response.data.products || [];
+
+
+  //     // 2️⃣ Check if product with idToCart is already in the cart (match id)
+  //     let found = false;
+  //     product_arr = product_arr.map((item) => {
+  //       if (item.productId === idToCart) {
+  //         found = true;
+  //         // 3️⃣ Increase quantity if already in cart
+  //         return { ...item, quantity: item.quantity + 1 };
+  //       }
+  //       return item;
+  //     });
+
+  //     if (!found) {
+  //       // 4️⃣ If not in cart, add as a new product
+  //       product_arr.push({
+  //         productId: idToCart,
+  //         quantity: 1,
+  //       });
+  //       console.log(`Added new product ${idToCart}`);
+  //     } else {
+  //       console.log(`Increased quantity for product ${idToCart}`);
+  //     }
+
+  //     // 5️⃣ Send updated cart back to the API (PUT)
+  //     const updatedCart = {
+  //       userId,
+  //       id,
+  //       date: new Date().toISOString().split("T")[0],
+  //       products: product_arr,
+  //     };
+
+  //     const updateResponse = await instance.put(`carts/${cartId}`, updatedCart);
+  //     console.log("Cart updated:", updateResponse.data);
+
+  //   } catch (error) {
+  //     console.error("Error updating cart:", error);
+  //   }
+  // }
+
+
+
   const { id } = useParams();
 
   const [singleProduct, setSingleProduct] = useState({});
