@@ -1,17 +1,34 @@
-import axios from 'axios'
+import Lenis from 'lenis'
+import { useState } from 'react'
 import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import instance from '../config/axiosConfig'
+
 
 const First = () => {
-  // const [data, setData] = React.useState([])
-  const [product, setProduct] = React.useState([])
-  const [loading, setLoading] = React.useState(false)
+  useEffect(() => {
+    const lenis = new Lenis();
+
+    const raf = (time) => {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    };
+
+    requestAnimationFrame(raf);
+  }, []);
+  ////////////////////////////////////////////////////////
+
+
+
+
+  const [product, setProduct] = useState([])
+  const [loading, setLoading] = useState(false)
   useEffect(() => {
     getData();
   })
 
   async function getData() {
-    const url = await axios.get('https://fakestoreapi.com/products')
+    const url = await instance.get('/products')
     setProduct(url.data)
   }
 
@@ -19,9 +36,7 @@ const First = () => {
     const arr = input.split("")
     return arr.length > len ? arr.slice(0, len).join("") + "..." : input
   }
-  if (loading) {
-    return <h1>Loading...</h1>
-  }
+  if (loading) return <h1>Loading...</h1>
 
   return (
     <>
@@ -30,7 +45,7 @@ const First = () => {
           {product.length > 0 && product.map((obj) => (
             <div
               key={obj.id}
-              className="shadow-lg text-[#C63E21] bg-[#EEECEF] rounded-xl flex flex-col items-center p-8 min-h-[400px] min-w-[270px]"
+              className="shadow-lg text-[#C63E21] bg-[#EEECEF] flex flex-col items-center p-8 min-h-[400px] min-w-[270px]"
             >
               <a href={`/product/${obj.id}`} className="w-full flex justify-center">
                 <img
@@ -46,13 +61,11 @@ const First = () => {
               </h3>
               <p className="text-[1.4rem] font-[machina-light] m-0">${obj.price}</p>
 
-              {/* <div className='relative overflow-hidden pt-8'> */}
-              <Link to="/about" className='pt-7'>
+              <Link to="/cart" className='pt-7'>
                 <h2 className='font-[machina-bold] font-bold border px-10 py-2 rounded border-[#C63E21]/40 text-[#C63E21]'>
                   Add
                 </h2>
               </Link>
-              {/* </div> */}
             </div>
           ))}
         </div>

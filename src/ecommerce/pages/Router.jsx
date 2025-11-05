@@ -7,7 +7,7 @@ import Contact from './Contact'
 // import Home from './Home'
 import First from './First'
 import OutletComponent from '../components/OutletComponent'
-import SingleProduct from '../components/SingleProduct'
+import SingleProduct from './SingleProduct'
 
 const routes = createBrowserRouter([
     {
@@ -15,7 +15,7 @@ const routes = createBrowserRouter([
         element: <OutletComponent />,
         children: [
             {
-                path: '/',
+                index: true,
                 element: <First />
             },
             {
