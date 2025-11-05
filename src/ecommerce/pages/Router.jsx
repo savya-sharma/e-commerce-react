@@ -8,6 +8,9 @@ import Contact from './Contact'
 import First from './First'
 import OutletComponent from '../components/OutletComponent'
 import SingleProduct from './SingleProduct'
+import Login from './Login'
+import Register from './Register'
+import CartProvider from '../contexts/CartProvider'
 
 const routes = createBrowserRouter([
     {
@@ -31,19 +34,32 @@ const routes = createBrowserRouter([
                 element: <Blog />
             },
             {
-                path: 'carts/:id',
+                path: '/cart',
                 element: <Cart />
             },
             {
                 path: '/contact',
                 element: <Contact />
             },
+            {
+                path: '/login',
+                element: <Login />
+            },
+            {
+                path: '/register',
+                element: <Register />
+            }
         ]
     },
 
 ])
 const Router = () => {
-    return <RouterProvider router={routes} />
+
+    return (
+        <CartProvider>
+            <RouterProvider router={routes} />
+        </CartProvider>
+    )
 }
 
 export default Router

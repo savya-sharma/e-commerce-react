@@ -4,10 +4,6 @@ import instance from '../config/axiosConfig'
 
 const Cart = () => {
 
-
-
-
-  
   const { id } = useParams();
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -38,12 +34,10 @@ const Cart = () => {
       cart
       <div>
         <div>
-          <img src={cartProducts.image} alt="" />
+          <img src={cart.image} alt="" />
         </div>
-        <h3>{cartProducts.title}</h3>
-        <h3>{cartProducts.price}</h3>
-        <h3>{cartProducts.category}</h3>
-        <p>{cartProducts.description}</p>
+        <h3>{cart.title}</h3>
+        <h3>{cart.price}</h3>
       </div>
     </div>
   )
