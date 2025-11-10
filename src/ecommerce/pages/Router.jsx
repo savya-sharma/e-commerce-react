@@ -1,16 +1,18 @@
 import React from 'react'
-import { Routes, Route, RouterProvider, createBrowserRouter } from 'react-router-dom'
+import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import About from './About'
 import Blog from './Blog'
 import Cart from './Cart'
 import Contact from './Contact'
-// import Home from './Home'
 import First from './First'
 import OutletComponent from '../components/OutletComponent'
 import SingleProduct from './SingleProduct'
 import Login from './Login'
 import Register from './Register'
+import Home from './Home'
+import ProctectedRoute from '../components/ProctectedRoute'
 import CartProvider from '../contexts/CartProvider'
+import AuthProvider from '../contexts/AuthProvider'
 
 const routes = createBrowserRouter([
     {
@@ -22,7 +24,7 @@ const routes = createBrowserRouter([
                 element: <First />
             },
             {
-                path: '/about',
+                path: 'about',
                 element: <About />
             },
             {
@@ -30,35 +32,44 @@ const routes = createBrowserRouter([
                 element: <SingleProduct />
             },
             {
-                path: '/blog',
+                path: 'blog',
                 element: <Blog />
             },
             {
-                path: '/cart',
+                path: 'cart',
                 element: <Cart />
             },
             {
-                path: '/contact',
+                path: 'contact',
                 element: <Contact />
             },
             {
-                path: '/login',
+                path: 'login',
                 element: <Login />
             },
             {
-                path: '/register',
+                path: 'register',
                 element: <Register />
+            },
+            {
+                path: 'home',
+                element: (
+                    <ProctectedRoute>
+                        <Home />
+                    </ProctectedRoute>
+                ),
             }
         ]
     },
-
 ])
-const Router = () => {
 
+const Router = () => {
     return (
-        <CartProvider>
-            <RouterProvider router={routes} />
-        </CartProvider>
+        <AuthProvider>
+            <CartProvider>
+                <RouterProvider router={routes} />
+            </CartProvider>
+        </AuthProvider>
     )
 }
 

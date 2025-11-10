@@ -1,6 +1,6 @@
 import { useState } from "react";
 import instance from "../config/axiosConfig";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 function Login() {
   const [data, setData] = useState({
@@ -9,6 +9,10 @@ function Login() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isError, setIsError] = useState(null);
+  const navigate = useNavigate();
+
+
+  console.log(useLocation());
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -19,7 +23,14 @@ function Login() {
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      const response = await instance.post("/auth/login", data);
+      const response = await instance.post("/auth/login", data,
+        {
+          withCredentials: true,
+        });
+      console.log(response)
+      if (response.status === 200) {
+        window.location.href = "/home";
+      }
     } catch (error) {
       console.log(error);
       setIsError(error);
@@ -32,9 +43,10 @@ function Login() {
   return (
     <>
       <div className="min-h-screen flex items-center justify-center bg-black font-[machina-light]">
+        {isError && <p>{isError}</p>}
         <div className="flex w-full max-w-5xl rounded-xl overflow-hidden shadow-lg" style={{ minHeight: '560px' }}>
           {/* Left panel */}
-          <div className="w-1/2 bg-gradient-to-br from-[#163526] via-[#18382b] to-[#163526] px-10 py-16 flex flex-col justify-between hidden md:flex">
+          <div className="w-1/2 bg-gradient-to-br from-[#163526] via-[#C63E2F] to-[#163526] px-10 py-16 flex flex-col justify-between hidden md:flex">
             <div>
               <h2 className="text-white text-3xl font-semibold mb-5 leading-tight">
                 Get Started<br />with Us

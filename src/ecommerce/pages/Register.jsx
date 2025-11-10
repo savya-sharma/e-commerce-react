@@ -1,6 +1,6 @@
 import { useState } from "react";
 import instance from "../config/axiosConfig";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Register() {
   const [data, setData] = useState({
@@ -11,21 +11,27 @@ function Register() {
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isError, setIsError] = useState(null);
+  // const [isError, setIsError] = useState(null);
+  const navigate = useNavigate();
 
   function handleChange(e) {
     const { name, value } = e.target;
     setData({ ...data, [name]: value });
   }
-
   async function handleSubmit(e) {
     e.preventDefault();
     try {
       setIsSubmitting(true);
       const response = await instance.post("/auth/register", data);
+      if (
+        response.status === 201 &&
+        response.message === "Data added successfully"
+      ) {
+        navigate("/login");
+      }
     } catch (error) {
       console.log(error);
-      setIsError(error);
+      // setIsError(error.message);
       setIsSubmitting(false);
     } finally {
       setIsSubmitting(false);
@@ -37,12 +43,12 @@ function Register() {
       <div className="min-h-screen flex items-center justify-center bg-black font-[machina-light]">
         <div className="flex w-full max-w-5xl rounded-xl overflow-hidden shadow-lg" style={{ minHeight: '560px' }}>
           {/* Left panel */}
-          <div className="w-1/2 bg-gradient-to-br from-[#14422f] via-[#133b2b] to-[#0e1b18] px-10 py-16 flex flex-col justify-between hidden md:flex">
+          <div className="w-1/2 bg-gradient-to-br from-[#14422f] via-[#C63E2F] to-[#0e1b18] px-10 py-16 flex flex-col justify-between hidden md:flex">
             <div>
               <h2 className="text-white text-3xl font-semibold mb-5 leading-tight">
                 Get Started<br />with Us
               </h2>
-              <p className="text-[#e4e5ec] text-base mb-12 max-w-[240px]">
+              <p className="text-white text-base mb-12 max-w-[240px]">
                 Complete these easy steps to register your account.
               </p>
             </div>

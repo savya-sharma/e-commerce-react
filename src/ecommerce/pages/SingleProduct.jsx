@@ -7,6 +7,7 @@ import { useCart } from '../contexts/CartProvider';
 
 const SingleProduct = () => {
   const { id } = useParams();
+  // console.log(id)
 
   const { cart, setCart } = useCart();
   const [singleProduct, setSingleProduct] = useState({});
@@ -18,20 +19,23 @@ const SingleProduct = () => {
     console.log(id)
   }, [id])
 
+  //whenever cart changes, update local storage  
   useEffect(() => {
-    localStorage.setItem("storedCart", JSON.stringify(cart));  
+    // localStorage.setItem("storedCart", JSON.stringify(cart));  
+    localStorage.setItem("storedCart", JSON.stringify(cart));
   }, [cart]);
 
   async function getSingleData(id) {
     setLoading(true);
     const response = await instance.get("/product/product/" + id);
-    setSingleProduct(response.data);
+  setSingleProduct(response.data);
     setLoading(false);
   }
+
   if (loading) return <h1>Loading...</h1>
 
   function handleAddToCart(idToAdd) {
-    setCart([...cart, {id: idToAdd, quantity: 1}]);
+    setCart([...cart, { id: idToAdd, quantity: 1 }]);
   }
 
   return (
@@ -58,17 +62,7 @@ const SingleProduct = () => {
         <div className="mb-7">
           <p className="text-[#444] text-base font-[machina-light] leading-relaxed max-w-[520px]">{singleProduct.description}</p>
         </div>
-        <div className="flex items-center gap-4 mb-7">
-          <span className="block w-8 h-8 rounded-full bg-[#f5f5f5] flex items-center justify-center text-[#aaa]">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" className="w-5 h-5"><circle cx="10" cy="10" r="7" stroke="#aaa" strokeWidth="2" /></svg>
-          </span>
-          <span className="block w-8 h-8 rounded-full bg-[#f5f5f5] flex items-center justify-center text-[#aaa]">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" className="w-5 h-5"><rect x="3" y="6" width="14" height="8" rx="4" stroke="#aaa" strokeWidth="2" /></svg>
-          </span>
-          <span className="block w-8 h-8 rounded-full bg-[#f5f5f5] flex items-center justify-center text-[#aaa]">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" className="w-5 h-5"><path d="M5 9.5C5 7.567 6.567 6 8.5 6s3.5 1.567 3.5 3.5S10.433 13 8.5 13 5 11.433 5 9.5Z" stroke="#aaa" strokeWidth="2" /></svg>
-          </span>
-        </div>
+       
         <div className="flex items-center gap-5">
           <div className="flex items-center border rounded bg-[#fafafa] px-3 py-1 w-max">
             <button className="text-2xl font-semibold px-2 text-[#999] focus:outline-none" onClick={() => { }}>-</button>
