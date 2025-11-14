@@ -1,9 +1,16 @@
 @import "tailwindcss";
+
 @font-face {
     font-family: machina-light;
     src: url(./assets/font/NeueMachina-Light.otf);
 }
+
 @font-face {
     font-family: machina-bold;
-    src: url( ./assets/font/NeueMachina-Regular.otf);
+    src: url(./assets/font/NeueMachina-Regular.otf);
+}
+
+@font-face {
+    font-family: halve-light;
+    src: url(./assets/font/helve-light.ttf);
 }

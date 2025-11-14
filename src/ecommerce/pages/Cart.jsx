@@ -1,33 +1,90 @@
 import React, { useEffect, useState } from 'react'
 import { useCart } from '../contexts/CartProvider'
 import instance from '../config/axiosConfig';
+import { useCurrency } from '../contexts/Currency';
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState([]);
-  const { cart } = useCart();
+  const { cart, cartItems, setCartItems } = useCart();
+
+  // Get functions to convert price and get currency symbol (₹, $, €)
+  const { convertPrice, getCurrencySymbol } = useCurrency();
   console.log(cart)
+
+  // quantity state to store quantities of each item, aligned by index
+  const [quantity, setQuantity] = useState([]);
 
   useEffect(() => {
     getCartProducts();
-  }, []);
+  }, [cart]);
+
+  useEffect(() => {
+    if (cart && cart.length > 0) {
+      const newQuantities = cart.map(item => {
+        if (item && typeof item.quantity === 'number' && item.quantity > 0) {
+          return item.quantity;
+        } else {
+          return 1;
+        }
+      });
+      setQuantity(newQuantities);
+    } else {
+      setQuantity([]);
+    }
+  }, [cart]);
+
+
+  useEffect(() => {
+    // localStorage.setItem("storedCart", JSON.stringify(cart));  
+    localStorage.setItem("storedCart", JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  useEffect(() => {
+    handleRemove();
+  }, [cart])
+
 
   async function getCartProducts() {
     const promises = cart.map((obj) => {
       return instance.get("/product/product/" + obj.id);
     });
     let temp = await Promise.all(promises);
-    console.log(temp);
     setCartItems(temp.map((obj) => obj.data));
   }
 
-  // Calculate totals
-  const subTotal = cartItems.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
-  const discount = subTotal * 0.5; // 50% discount
-  const deliveryFee = 50.00;
-  const total = subTotal - discount + deliveryFee;
+
+
+  function handleQuantityChange(action, index) {
+    setQuantity(prevQuantity => {
+      const updatedQuantities = [...prevQuantity];
+
+      if (action === 'increment') {
+        updatedQuantities[index] = (updatedQuantities[index] || 1) + 1;
+      } else if (action === 'decrement') {
+        const currentQty = updatedQuantities[index] || 1;
+        updatedQuantities[index] = currentQty > 1 ? currentQty - 1 : 1;
+      }
+
+      return updatedQuantities;
+    });
+  }
+
+  function totalPrice() {
+    let total = 0;
+
+    cartItems.forEach((item, idx) => {
+      const qty = quantity[idx] || 1;
+      total += item.price * qty;
+    });
+
+    return total;
+  }
+
+  function handleRemove(id) {
+    return setCartItems(cartItems.filter((obj) => obj._id !== id));
+  }
 
   return (
-    <div className='min-h-screen bg-white py-12 px-4'>
+    <div className='min-h-screen bg-white py-12 px-4 font-[machina-light]'>
       {/* Header */}
       <div className='max-w-7xl mx-auto mb-8'>
         <div className='flex items-center justify-between mb-6'>
@@ -37,9 +94,6 @@ const Cart = () => {
             </svg>
             <span className='text-xl font-semibold'>skyrise decor</span>
           </div>
-          <button className='px-6 py-2 border border-black rounded-full text-sm font-medium hover:bg-black hover:text-white transition-colors'>
-            Let's Talk!
-          </button>
         </div>
         <h1 className='text-4xl font-bold mb-2'>Shopping Cart</h1>
       </div>
@@ -52,13 +106,13 @@ const Cart = () => {
           <div className='grid grid-cols-12 gap-4 pb-4 border-b border-gray-300 mb-6'>
             <div className='col-span-5 text-sm font-medium text-gray-700'>Product Code</div>
             <div className='col-span-3 text-sm font-medium text-gray-700 text-center'>Quantity</div>
-            <div className='col-span-2 text-sm font-medium text-gray-700 text-center'>Total</div>
+            <div className='col-span-2 text-sm font-medium text-gray-700 text-center'>Price</div>
             <div className='col-span-2 text-sm font-medium text-gray-700 text-center'>Action</div>
           </div>
 
           {/* Cart Items */}
           {cartItems.map((obj, index) => (
-            <div key={obj._id || index} className='grid grid-cols-12 gap-4 items-center py-6 border-b border-gray-200 last:border-b-0'>
+            <div key={obj._id} className='grid grid-cols-12 gap-4 items-center py-6 border-b border-gray-200 last:border-b-0'>
               {/* Product Info */}
               <div className='col-span-5 flex items-center gap-4'>
                 <div className='w-20 h-20 bg-white rounded-lg p-2 flex items-center justify-center'>
@@ -73,20 +127,25 @@ const Cart = () => {
               {/* Quantity Controls */}
               <div className='col-span-3 flex justify-center'>
                 <div className='flex items-center gap-3 border border-gray-300 rounded-full px-4 py-2'>
-                  <button className='text-lg font-medium hover:text-gray-600'>-</button>
-                  <span className='text-base font-medium min-w-[20px] text-center'>{obj.quantity || 1}</span>
-                  <button className='text-lg font-medium hover:text-gray-600'>+</button>
+                  <button onClick={() => handleQuantityChange('decrement', index)} className='text-lg font-medium hover:text-gray-600'>-</button>
+                  {/* show current quantity for this product */}
+                  <span className='text-base font-medium min-w-[20px] text-center'>{quantity[index] || 1}</span>
+                  <button onClick={() => handleQuantityChange('increment', index)} className='text-lg font-medium hover:text-gray-600'>+</button>
                 </div>
               </div>
 
-              {/* Price */}
+              {/* Price - Show in selected currency */}
               <div className='col-span-2 text-center'>
-                <span className='text-lg font-semibold'>${obj.price}</span>
+                <span className='text-lg font-semibold'>
+                  {/* getCurrencySymbol() = ₹ or $ or € */}
+                  {/* convertPrice() = converts INR to selected currency */}
+                  {getCurrencySymbol()} {convertPrice(obj.price * (quantity[index] || 1))}
+                </span>
               </div>
 
               {/* Remove Button */}
               <div className='col-span-2 flex justify-center'>
-                <button className='p-2 hover:bg-gray-200 rounded-lg transition-colors'>
+                <button onClick={() => handleRemove(obj._id)} className='p-2 hover:bg-gray-200 rounded-lg transition-colors'>
                   <svg className='w-5 h-5' viewBox='0 0 24 24' fill='currentColor'>
                     <path d='M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z' />
                   </svg>
@@ -108,38 +167,11 @@ const Cart = () => {
           <div className='bg-gray-50 rounded-2xl p-6'>
             <h2 className='text-xl font-bold mb-6'>Order Summary</h2>
 
-            {/* Discount Code */}
-            <div className='mb-6'>
-              <input
-                type='text'
-                placeholder='Discount code/Promo code'
-                className='w-full px-4 py-3 border border-gray-300 rounded-lg mb-3 text-sm focus:outline-none focus:border-gray-400'
-              />
-              <button className='w-full px-4 py-3 border border-black rounded-lg text-sm font-medium hover:bg-black hover:text-white transition-colors'>
-                Apply
-              </button>
-            </div>
-
-            {/* Summary Details */}
-            <div className='space-y-3 mb-6 pb-6 border-b border-gray-300'>
-              <div className='flex justify-between text-sm'>
-                <span className='text-gray-600'>Sub-Total</span>
-                <span className='font-medium'>{subTotal.toFixed(2)} USD</span>
-              </div>
-              <div className='flex justify-between text-sm'>
-                <span className='text-gray-600'>Discount (-50%)</span>
-                <span className='font-medium text-red-600'>-{discount.toFixed(2)} USD</span>
-              </div>
-              <div className='flex justify-between text-sm'>
-                <span className='text-gray-600'>Delivery Fee</span>
-                <span className='font-medium'>{deliveryFee.toFixed(2)} USD</span>
-              </div>
-            </div>
-
-            {/* Total */}
+            {/* Total - Show in selected currency */}
             <div className='flex justify-between items-center mb-6'>
               <span className='text-base font-medium'>Total</span>
-              <span className='text-2xl font-bold'>${total.toFixed(2)} USD</span>
+              {/* totalPrice() calculates total in INR, then convertPrice() converts to selected currency */}
+              <span className='text-2xl font-bold'>{getCurrencySymbol()} {convertPrice(totalPrice())}</span>
             </div>
 
             {/* Warranty Info */}
@@ -167,29 +199,6 @@ const Cart = () => {
           <div>
             <p className='text-sm text-gray-600 mb-1'>Build custom furniture</p>
             <h2 className='text-3xl font-bold'>Craft Own Furniture</h2>
-          </div>
-          <button className='px-6 py-2 bg-black text-white rounded-full text-sm font-medium hover:bg-gray-800 transition-colors'>
-            Let's Talk!
-          </button>
-        </div>
-      </div>
-
-      {/* Bottom Footer */}
-      <div className='max-w-7xl mx-auto mt-12 pt-8 border-t border-gray-200'>
-        <div className='flex flex-col md:flex-row justify-between items-center gap-4'>
-          <div className='text-sm text-gray-600'>
-            <p>©2023. All right reserved.</p>
-            <p className='font-semibold'>SEATIVE DIGITAL</p>
-          </div>
-          <div className='flex gap-4'>
-            <button className='px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors'>Facebook</button>
-            <button className='px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors'>Instagram</button>
-            <button className='px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors'>Twitter</button>
-            <button className='px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors'>LinkedIn</button>
-          </div>
-          <div className='text-sm text-right'>
-            <p>36 East 78th street</p>
-            <p className='font-semibold'>NEW YORK, NY</p>
           </div>
         </div>
       </div>

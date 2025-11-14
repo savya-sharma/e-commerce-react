@@ -13,6 +13,7 @@ import Home from './Home'
 import ProctectedRoute from '../components/ProctectedRoute'
 import CartProvider from '../contexts/CartProvider'
 import AuthProvider from '../contexts/AuthProvider'
+import CurrencyProvider from '../contexts/Currency'
 
 const routes = createBrowserRouter([
     {
@@ -66,9 +67,11 @@ const routes = createBrowserRouter([
 const Router = () => {
     return (
         <AuthProvider>
-            <CartProvider>
-                <RouterProvider router={routes} />
-            </CartProvider>
+            <CurrencyProvider>
+                <CartProvider>
+                    <RouterProvider router={routes} />
+                </CartProvider>
+            </CurrencyProvider>
         </AuthProvider>
     )
 }

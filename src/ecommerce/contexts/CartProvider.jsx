@@ -8,8 +8,16 @@ const CartProvider = ({ children }) => {
       ? JSON.parse(localStorage.getItem("storedCart"))
       : []
   );
+
+  const [cartItems, setCartItems] = useState(
+
+    localStorage.getItem("storedCart") !== null
+      ? JSON.parse(localStorage.getItem("storedCart"))
+      : []
+  );
+
   return (
-    <cartContext.Provider value={{ cart, setCart }}>
+    <cartContext.Provider value={{ cart, setCart, cartItems, setCartItems }}>
       {children}
     </cartContext.Provider>
   )

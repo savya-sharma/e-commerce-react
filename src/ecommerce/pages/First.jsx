@@ -3,9 +3,13 @@ import { useState } from 'react'
 import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import instance from '../config/axiosConfig'
+import { useCurrency } from '../contexts/Currency'
 
 
 const First = () => {
+  // Step 1: Get the formatPrice function from Currency context
+  // formatPrice will convert INR price to selected currency and add symbol
+  const { formatPrice } = useCurrency();
   useEffect(() => {
     const lenis = new Lenis();
 
@@ -24,62 +28,69 @@ const First = () => {
 
 
 
-  const [product, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
+  // Step 2: Create state to store products from API
+  const [product, setProducts] = useState([]);  // Empty array initially
+  const [loading, setLoading] = useState(false);  // Loading state
 
+  // Step 3: Fetch products when component loads (runs only once)
   useEffect(() => {
-    getData();
-  }, []);
+    getData();  // Call getData function
+  }, []);  // Empty [] means run only once when page loads
 
+  // Step 4: Function to get products from API
   async function getData() {
     try {
-      setLoading(true);
-      const response = await instance.get("/product/get");
-      console.log(response.data);
-      setProducts(response.data);
-      setLoading(false);
+      setLoading(true);  // Show loading
+      const response = await instance.get("/product/get");  // Get data from API
+      setProducts(response.data);  // Save products in state
+      setLoading(false);  // Hide loading
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching data:", error);  // Show error if API fails
     }
-
-  }
-
-  function trimContent(input, len) {
-    let arr = input.split(" ");
-    return arr.length > len ? arr.slice(0, len).join(" ") + "..." : input;
   }
 
   if (loading) return <div className="loader">Loading.....</div>
 
   return (
     <>
-      <div className="min-h-screen w-full flex items-stretch justify-stretch">
-        <div className="w-full bg-[#F9F7FA] grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 lg:grid-cols-4">
-          {product.length > 0 && product.map((obj) => (
-            <div
-              key={obj._id}
-              className="shadow-lg text-[#C63E21] bg-[#EEECEF] flex flex-col items-center p-8 min-h-[400px] min-w-[270px]"
-            >
-              <Link to={`/product/${obj._id}`} className="w-full flex justify-center">
-                <img
-                  src={obj.image}
-                  alt={obj.title}
-                  className="h-[220px] object-contain mb-6 w-full"
-                />
-              </Link>
-              <h3 className="text-[1.3rem] font-[machina-bold] mb-3 text-center w-full">
-                <Link to={`/product/${obj._id}`}>
-                  {obj.name}
+      <div className="min-h-screen w-full bg-white py-8 font-[halve-light]">
+        <div className="max-w-7xl mx-auto">
+          {/* Product Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
+            {product.length > 0 && product.map((obj) => (
+              <div
+                key={obj._id}
+                className="group relative bg-[#E8E8E8] hover:bg-[#E0E0E0] transition-colors duration-200"
+              >
+                {/* Product Image Container */}
+                <Link to={`/product/${obj._id}`} className="block relative aspect-[3/3] overflow-hidden">
+                  <img
+                    src={obj.image}
+                    alt={obj.name}
+                    className="w-full h-full object-cover object-center"
+                  />
+
+                  {/* Bookmark Icon - Top Right */}
                 </Link>
-              </h3>
-              <p className="text-[1.4rem] font-[machina-light] m-0">${obj.price}</p>
-              {/* <Link to="/cart" className='pt-7'>
-                <h2 className='font-[machina-bold] font-bold border px-10 py-2 rounded border-[#C63E21]/40 text-[#C63E21]'>
-                  Add
-                </h2>
-              </Link> */}
-            </div>
-          ))}
+
+                {/* Product Info */}
+                <div className="p-4 bg-white">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <h3 className="text-sm font-normal uppercase tracking-wide text-gray-900 mb-1">
+                        <Link to={`/product/${obj._id}`} className="hover:underline">
+                          {obj.name}
+                        </Link>
+                      </h3>
+                      {/* Step 5: Show price in selected currency */}
+                      {/* formatPrice converts INR to selected currency and adds symbol */}
+                      <p className="text-sm text-gray-900">{formatPrice(obj.price)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </>

@@ -42,7 +42,7 @@ function Login() {
 
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center bg-black font-[machina-light]">
+      <div className="min-h-screen flex items-center justify-center bg-black font-[halve-light]">
         {isError && <p>{isError}</p>}
         <div className="flex w-full max-w-5xl rounded-xl overflow-hidden shadow-lg" style={{ minHeight: '560px' }}>
           {/* Left panel */}

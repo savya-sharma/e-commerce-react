@@ -11,7 +11,7 @@ function AuthProvider({ children }) {
         checkAuthStatus();
     }, []);
 
-    async function checkAuthStatus() {  
+    async function checkAuthStatus() {
         console.log("inside authProvider");
         try {
             const response = await instance.get("/auth/authCheck", {
@@ -26,7 +26,7 @@ function AuthProvider({ children }) {
 
     async function logout() {
         try {
-            await instance.get(
+            await instance.post(
                 "/auth/logout",
                 {},
                 {

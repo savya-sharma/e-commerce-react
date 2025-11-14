@@ -5,13 +5,10 @@
 
 //UseReducer - is a hook that allows you to manage state in a more complex way. useContext only manages the simple thing well but if we want to manage complex state then we use useReducer. (link accessing king of things, checks logins) useContext + useReducer = Redux
 
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import Router from './ecommerce/pages/Router'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
     <Router />
-  </StrictMode>,
 )
