@@ -42,7 +42,7 @@ function Login() {
 
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center bg-black font-[halve-light]">
+      <div className="min-h-screen flex items-center justify-center bg-black font-[machina-light]">
         {isError && <p>{isError}</p>}
         <div className="flex w-full max-w-5xl rounded-xl overflow-hidden shadow-lg" style={{ minHeight: '560px' }}>
           {/* Left panel */}
@@ -56,6 +56,7 @@ function Login() {
               </p>
             </div>
           </div>
+          
           {/* Right login form */}
           <div className="w-full md:w-1/2 bg-[#181818] px-10 py-16 flex flex-col justify-center">
             <h2 className="text-xl md:text-2xl font-semibold text-white text-center mb-1">Sign Up Account</h2>
@@ -103,6 +104,7 @@ function Login() {
               </p>
             </form>
           </div>
+
         </div>
       </div>
     </>

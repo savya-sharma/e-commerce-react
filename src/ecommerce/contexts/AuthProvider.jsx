@@ -1,39 +1,51 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useReducer, useState } from "react";
 import instance from "../config/axiosConfig";
 import { Navigate } from "react-router-dom";
+
 
 const authContext = createContext();
 
 function AuthProvider({ children }) {
-    const [isLoggedIn, setIsLoggedIn] = useState(null);
+    const initialState = {
+        isLoggedIn: null,
+    };
+
+    const [state, dispatch] = useReducer(authReducer, initialState);
+
+    function authReducer(state, action) {
+        switch (action.type) {
+            case "LOGIN":
+                return { ...state, isLoggedIn: true };
+            case "LOGOUT":
+                return { ...state, isLoggedIn: false };
+            default:
+                return state;
+        }
+    }
 
     useEffect(() => {
         checkAuthStatus();
     }, []);
 
     async function checkAuthStatus() {
-        console.log("inside authProvider");
+        // console.log("inside authProvider");
         try {
             const response = await instance.get("/auth/authCheck", {
                 withCredentials: true,
             });
-            setIsLoggedIn(true);
+            dispatch(true);
         } catch (error) {
             console.log(error);
-            setIsLoggedIn(false);
+            dispatch(false);
         }
     }
 
     async function logout() {
         try {
             await instance.post(
-                "/auth/logout",
-                {},
-                {
-                    withCredentials: true,
-                }
+                "/auth/logout", {}, { withCredentials: true, }
             );
-            setIsLoggedIn(false);
+            dispatch(false);
             <Navigate to="/login" />;
         } catch (error) {
             console.log("clicked issue");
@@ -41,7 +53,7 @@ function AuthProvider({ children }) {
     }
 
     return (
-        <authContext.Provider value={{ isLoggedIn, checkAuthStatus, logout }}>
+        <authContext.Provider value={{ state, checkAuthStatus, logout }}>
             {children}
         </authContext.Provider>
     );

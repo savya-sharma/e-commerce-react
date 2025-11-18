@@ -19,7 +19,7 @@ const SingleProduct = () => {
 
   useEffect(() => {
     getSingleData(id);
-    console.log(id)
+    // console.log(id)
   }, [id])
 
   //whenever cart changes, update local storage  

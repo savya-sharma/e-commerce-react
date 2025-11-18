@@ -53,7 +53,7 @@ const First = () => {
 
   return (
     <>
-      <div className="min-h-screen w-full bg-white py-8 font-[halve-light]">
+      <div className="min-h-screen w-full bg-white py-8 font-[machina-light]">
         <div className="max-w-7xl mx-auto">
           {/* Product Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">

@@ -4,7 +4,10 @@ import { exchnageRateAPI } from '../config/axiosConfig'
 const currencyContext = createContext();
 
 const CurrencyProvider = ({ children }) => {
-    const [currency, setCurrency] = useState('INR');
+    const [currency, setCurrency] = useState(() => {
+        return localStorage.getItem('currency') || 'INR'
+    }
+    );
 
     const [exchangeRates, setExchangeRates] = useState({});
 
@@ -12,12 +15,18 @@ const CurrencyProvider = ({ children }) => {
         fetchExchangeRates();
     }, []);
 
+    useEffect(() => {
+        if (currency) {
+            localStorage.setItem('currency', currency);
+        }
+    }, []);
+
 
     async function fetchExchangeRates() {
         try {
-            // Call API to get latest rates (base currency is INR)
             const response = await exchnageRateAPI.get('/INR');
             console.log(response.data);
+            localStorage.setItem('exchangeRates', JSON.stringify(response.data.conversion_rates));
 
             if (response.data && response.data.conversion_rates) {
                 setExchangeRates(response.data.conversion_rates);
@@ -34,7 +43,8 @@ const CurrencyProvider = ({ children }) => {
             return priceInINR;
         }
         console.log(!exchangeRates[currency])
-        const convertedPrice = priceInINR * exchangeRates[currency];
+        const convertedPrice = priceInINR * exchangeRates[currency];   //price is the original price of the product, and exchangeRates[currency] comes from the API response
+        console.log(convertedPrice)
         return convertedPrice.toFixed(2);
     }
 
@@ -47,23 +57,20 @@ const CurrencyProvider = ({ children }) => {
         return symbols[currency];
     }
 
-    // Step 8: Function to format price with symbol (e.g., "₹ 100" or "$ 1.20")
     function formatPrice(priceInINR) {
         const converted = convertPrice(priceInINR);
         return `${getCurrencySymbol()} ${converted}`;
     }
 
-    // Step 9: Package all data and functions to share with other components
     const value = {
-        currency,           // Current selected currency (INR, USD, EUR, etc.)
-        setCurrency,        // Function to change currency
-        convertPrice,       // Function to convert price
-        getCurrencySymbol,  // Function to get symbol
+        currency,
+        setCurrency,
+        convertPrice,
+        getCurrencySymbol,
         formatPrice,        // Function to format price with symbol
         exchangeRates       // All exchange rates from API
     };
 
-    // Step 10: Provide the data to all child components
     return (
         <currencyContext.Provider value={value}>
             {children}

@@ -10,6 +10,7 @@ function Register() {
     email: "",
     password: "",
   });
+  console.log(data)
   const [isSubmitting, setIsSubmitting] = useState(false);
   // const [isError, setIsError] = useState(null);
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ function Register() {
     const { name, value } = e.target;
     setData({ ...data, [name]: value });
   }
+
   async function handleSubmit(e) {
     e.preventDefault();
     try {
@@ -40,7 +42,7 @@ function Register() {
 
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center bg-black font-[halve-light]">
+      <div className="min-h-screen flex items-center justify-center bg-black font-[machina-light]">
         <div className="flex w-full max-w-5xl rounded-xl overflow-hidden shadow-lg" style={{ minHeight: '560px' }}>
           {/* Left panel */}
           <div className="w-1/2 bg-gradient-to-br from-[#14422f] via-[#C63E2F] to-[#0e1b18] px-10 py-16 flex flex-col justify-between hidden md:flex">

@@ -120,7 +120,6 @@ const Cart = () => {
                 </div>
                 <div>
                   <h3 className='font-semibold text-base mb-1'>{obj.name}</h3>
-                  <p className='text-sm text-gray-500'>Set • Colour: {obj.color || 'Coffee'}</p>
                 </div>
               </div>
 

@@ -5,7 +5,7 @@ import { useCurrency } from '../contexts/Currency';
 import React from 'react';
 
 const Navbar = () => {
-    const { cartItems } = useCart();
+    const { cart } = useCart();
     const { isLoggedIn, logout } = useAuth();
     const { currency, setCurrency } = useCurrency();
 
@@ -18,16 +18,16 @@ const Navbar = () => {
         <div>
             <nav className='relative overflow-hidden flex justify-between px-4 bg-[#F9F7FA] text-[#C63E21] py-4'>
                 <NavLink to="/">
-                    <h1 className='z-10 text-[1.3vw] font-[halve-light] font-bold'>My Website</h1>
+                    <h1 className='z-10 text-[1.3vw] font-[machina-bold] font-bold'>My Website</h1>
                 </NavLink>
                 <div className="flex items-center gap-8">
-                    <ul className='flex gap-8 z-10 font-[halve-light] text-[0.9vw]'>
+                    <ul className='flex gap-8 z-10 font-[machina-light] text-[0.9vw]'>
                         <li><NavLink to="/">Home</NavLink></li>
                         <li><NavLink to="/about">About</NavLink></li>
                         <li><NavLink to="/blog">Blog</NavLink></li>
                         <li>
                             <NavLink className='flex items-center' to="/cart">
-                                SHOPPING BAG[{cartItems.length}]
+                                SHOPPING BAG[{cart.length}]
                             </NavLink>
                         </li>
                         <li><NavLink to="/contact">Contact</NavLink></li>
@@ -41,7 +41,7 @@ const Navbar = () => {
                     </ul>
 
                     {/* Currency Dropdown - User can select currency here */}
-                    <div className="ml-6">
+                    <div className="ml-6 font-[machina-light]">
                         <select
                             className="bg-white border border-gray-300 rounded px-3 py-1.5 text-[0.9vw] focus:outline-none focus:border-[#C63E21] cursor-pointer"
                             value={currency}  // Shows currently selected currency
