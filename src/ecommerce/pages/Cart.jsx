@@ -1,86 +1,59 @@
 import React, { useEffect, useState } from 'react'
 import { useCart } from '../contexts/CartProvider'
-import instance from '../config/axiosConfig';
 import { useCurrency } from '../contexts/Currency';
+import instance from '../config/axiosConfig';
 
 const Cart = () => {
-  const { cart, cartItems, setCartItems } = useCart();
-
-  // Get functions to convert price and get currency symbol (₹, $, €)
+  const { cart, cartItems, setCartItems, removeFromCart } = useCart();
   const { convertPrice, getCurrencySymbol } = useCurrency();
-  console.log(cart)
 
-  // quantity state to store quantities of each item, aligned by index
+  // quantity as a simple aligned array with cart items
   const [quantity, setQuantity] = useState([]);
 
+  // Fetch cart items and product details on mount or cart change
   useEffect(() => {
-    getCartProducts();
-  }, [cart]);
-
-  useEffect(() => {
-    if (cart && cart.length > 0) {
-      const newQuantities = cart.map(item => {
-        if (item && typeof item.quantity === 'number' && item.quantity > 0) {
-          return item.quantity;
-        } else {
-          return 1;
-        }
-      });
-      setQuantity(newQuantities);
-    } else {
-      setQuantity([]);
-    }
-  }, [cart]);
-
-
-  useEffect(() => {
-    // localStorage.setItem("storedCart", JSON.stringify(cart));  
-    localStorage.setItem("storedCart", JSON.stringify(cartItems));
-  }, [cartItems]);
-
-  useEffect(() => {
-    handleRemove();
-  }, [cart])
-
-
-  async function getCartProducts() {
-    const promises = cart.map((obj) => {
-      return instance.get("/product/product/" + obj.id);
-    });
-    let temp = await Promise.all(promises);
-    setCartItems(temp.map((obj) => obj.data));
-  }
-
-
-
-  function handleQuantityChange(action, index) {
-    setQuantity(prevQuantity => {
-      const updatedQuantities = [...prevQuantity];
-
-      if (action === 'increment') {
-        updatedQuantities[index] = (updatedQuantities[index] || 1) + 1;
-      } else if (action === 'decrement') {
-        const currentQty = updatedQuantities[index] || 1;
-        updatedQuantities[index] = currentQty > 1 ? currentQty - 1 : 1;
+    // Fetch product details from API
+    async function getCartProducts() {
+      if (!cart || cart.length === 0) {
+        setCartItems([]);
+        setQuantity([]);
+        return;
       }
+      try {
+        const temp = await Promise.all(
+          cart.map(obj => instance.get("/product/product/" + obj.id))
+        );
+        const products = temp.map((res, idx) => ({
+          ...res.data,
+          _id: res.data._id || res.data.id || cart[idx].id,
+        }));
+        setCartItems(products);
+        setQuantity(cart.map(item => item && item.quantity > 0 ? item.quantity : 1));
+      } catch (e) {
+        setCartItems([]);
+        setQuantity([]);
+      }
+    }
+    getCartProducts();
+  }, [cart, setCartItems]);
 
-      return updatedQuantities;
+  // Simple quantity change handler: only local state update
+  function handleQuantityChange(type, idx) {
+    setQuantity(q => {
+      const nq = [...q];
+      if (type === "increment") nq[idx] = (nq[idx] || 1) + 1;
+      else if (type === "decrement") nq[idx] = (nq[idx] || 1) > 1 ? (nq[idx] || 1) - 1 : 1;
+      return nq;
     });
   }
 
+  // Simple total price calculation
   function totalPrice() {
-    let total = 0;
-
-    cartItems.forEach((item, idx) => {
-      const qty = quantity[idx] || 1;
-      total += item.price * qty;
+    let t = 0;
+    cartItems.forEach((item, i) => {
+      t += (item.price || 0) * (quantity[i] || 1);
     });
-
-    return total;
-  }
-
-  function handleRemove(id) {
-    return setCartItems(cartItems.filter((obj) => obj._id !== id));
+    return t;
   }
 
   return (
@@ -98,7 +71,16 @@ const Cart = () => {
         <h1 className='text-4xl font-bold mb-2'>Shopping Cart</h1>
       </div>
 
+      {/* Empty Cart Message */}
+      {cartItems.length === 0 && (
+        <div className='max-w-7xl mx-auto text-center py-20'>
+          <h2 className='text-2xl font-semibold text-gray-700 mb-2'>Your cart is empty</h2>
+          <p className='text-gray-500 mb-6'>Add some products to get started!</p>
+        </div>
+      )}
+
       {/* Main Content */}
+      {cartItems.length > 0 && (
       <div className='max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8'>
         {/* Left Side - Cart Items */}
         <div className='lg:col-span-2 bg-gray-50 rounded-2xl p-8'>
@@ -113,7 +95,6 @@ const Cart = () => {
           {/* Cart Items */}
           {cartItems.map((obj, index) => (
             <div key={obj._id} className='grid grid-cols-12 gap-4 items-center py-6 border-b border-gray-200 last:border-b-0'>
-              {/* Product Info */}
               <div className='col-span-5 flex items-center gap-4'>
                 <div className='w-20 h-20 bg-white rounded-lg p-2 flex items-center justify-center'>
                   <img src={obj.image} alt={obj.name} className='w-full h-full object-contain' />
@@ -122,29 +103,20 @@ const Cart = () => {
                   <h3 className='font-semibold text-base mb-1'>{obj.name}</h3>
                 </div>
               </div>
-
-              {/* Quantity Controls */}
               <div className='col-span-3 flex justify-center'>
                 <div className='flex items-center gap-3 border border-gray-300 rounded-full px-4 py-2'>
                   <button onClick={() => handleQuantityChange('decrement', index)} className='text-lg font-medium hover:text-gray-600'>-</button>
-                  {/* show current quantity for this product */}
                   <span className='text-base font-medium min-w-[20px] text-center'>{quantity[index] || 1}</span>
                   <button onClick={() => handleQuantityChange('increment', index)} className='text-lg font-medium hover:text-gray-600'>+</button>
                 </div>
               </div>
-
-              {/* Price - Show in selected currency */}
               <div className='col-span-2 text-center'>
                 <span className='text-lg font-semibold'>
-                  {/* getCurrencySymbol() = ₹ or $ or € */}
-                  {/* convertPrice() = converts INR to selected currency */}
-                  {getCurrencySymbol()} {convertPrice(obj.price * (quantity[index] || 1))}
+                  {getCurrencySymbol()} {convertPrice((obj.price || 0) * (quantity[index] || 1))}
                 </span>
               </div>
-
-              {/* Remove Button */}
               <div className='col-span-2 flex justify-center'>
-                <button onClick={() => handleRemove(obj._id)} className='p-2 hover:bg-gray-200 rounded-lg transition-colors'>
+                <button onClick={() => removeFromCart(obj._id)} className='p-2 hover:bg-gray-200 rounded-lg transition-colors'>
                   <svg className='w-5 h-5' viewBox='0 0 24 24' fill='currentColor'>
                     <path d='M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z' />
                   </svg>
@@ -153,7 +125,7 @@ const Cart = () => {
             </div>
           ))}
 
-          {/* Update Cart Button */}
+          {/* Update Cart Button - no action (placeholder) */}
           <div className='mt-8'>
             <button className='bg-black text-white px-8 py-3 rounded-full font-medium hover:bg-gray-800 transition-colors'>
               Update Cart
@@ -169,11 +141,8 @@ const Cart = () => {
             {/* Total - Show in selected currency */}
             <div className='flex justify-between items-center mb-6'>
               <span className='text-base font-medium'>Total</span>
-              {/* totalPrice() calculates total in INR, then convertPrice() converts to selected currency */}
               <span className='text-2xl font-bold'>{getCurrencySymbol()} {convertPrice(totalPrice())}</span>
             </div>
-
-            {/* Warranty Info */}
             <div className='mb-6 p-3 bg-white rounded-lg'>
               <div className='flex items-start gap-2'>
                 <input type='checkbox' className='mt-1' />
@@ -183,24 +152,13 @@ const Cart = () => {
                 </p>
               </div>
             </div>
-
-            {/* Checkout Button */}
             <button className='w-full bg-black text-white py-4 rounded-full font-medium hover:bg-gray-800 transition-colors'>
               Checkout Now
             </button>
           </div>
         </div>
       </div>
-
-      {/* Footer Section */}
-      <div className='max-w-7xl mx-auto mt-16'>
-        <div className='flex items-center justify-between mb-4'>
-          <div>
-            <p className='text-sm text-gray-600 mb-1'>Build custom furniture</p>
-            <h2 className='text-3xl font-bold'>Craft Own Furniture</h2>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   )
 }

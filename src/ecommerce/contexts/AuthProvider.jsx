@@ -1,64 +1,42 @@
-import { createContext, useContext, useEffect, useReducer, useState } from "react";
-import instance from "../config/axiosConfig";
-import { Navigate } from "react-router-dom";
-
+import { createContext, useContext, useEffect, useState } from "react";
+import { auth } from "../../firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 const authContext = createContext();
 
 function AuthProvider({ children }) {
-    const initialState = {
-        isLoggedIn: null,
-    };
-
-    const [state, dispatch] = useReducer(authReducer, initialState);
-
-    function authReducer(state, action) {
-        switch (action.type) {
-            case "LOGIN":
-                return { ...state, isLoggedIn: true };
-            case "LOGOUT":
-                return { ...state, isLoggedIn: false };
-            default:
-                return state;
-        }
-    }
+    const [currentUser, setCurrentUser] = useState(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        checkAuthStatus();
-    }, []);
+        // Listen to Firebase auth state changes
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setCurrentUser(user);
+            setIsLoggedIn(user); // set isLoggedIn to user object (or null when not logged in)
+            setLoading(false);
+        });
 
-    async function checkAuthStatus() {
-        // console.log("inside authProvider");
-        try {
-            const response = await instance.get("/auth/authCheck", {
-                withCredentials: true,
-            });
-            dispatch(true);
-        } catch (error) {
-            console.log(error);
-            dispatch(false);
-        }
-    }
+        // Cleanup subscription on unmount
+        return unsubscribe;
+    }, []);
 
     async function logout() {
         try {
-            await instance.post(
-                "/auth/logout", {}, { withCredentials: true, }
-            );
-            dispatch(false);
-            <Navigate to="/login" />;
+            await signOut(auth);
+            setCurrentUser(null);
+            setIsLoggedIn(null);
         } catch (error) {
-            console.log("clicked issue");
+            console.error("Logout error:", error);
         }
     }
 
     return (
-        <authContext.Provider value={{ state, checkAuthStatus, logout }}>
+        <authContext.Provider value={{ currentUser, isLoggedIn, logout, loading }}>
             {children}
         </authContext.Provider>
     );
 }
-
 
 export function useAuth() {
     return useContext(authContext);

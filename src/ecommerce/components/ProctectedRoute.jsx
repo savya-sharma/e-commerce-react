@@ -2,21 +2,23 @@ import { useAuth } from '../contexts/AuthProvider'
 import { Navigate } from 'react-router-dom';
 
 const ProctectedRoute = ({ children }) => {
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, loading } = useAuth();
 
-    console.log("isLogined", isLoggedIn);
-
-    if (isLoggedIn === null) {
-        return <h1>Loading...</h1>
+    // Show loading state while checking authentication
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-black">
+                <h1 className="text-white text-2xl">Loading...</h1>
+            </div>
+        );
     }
 
-    if (isLoggedIn === false) {
+    // Redirect to login if not authenticated
+    if (!isLoggedIn) {
         return <Navigate to='/login' />
     }
 
-    return (
-        children
-    )
+    return children;
 }
 
 export default ProctectedRoute
